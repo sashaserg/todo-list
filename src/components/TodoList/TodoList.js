@@ -68,9 +68,11 @@ class TodoList extends Component
   {
     return (
         <div className='TodoList-container'>
+
             <div className='clearBtn' onClick={this.clearTaskHandler}>
               <FontAwesomeIcon icon='trash-alt'/>
             </div>
+
             <div className='taskCreator'>
               <input placeholder='+  Add new item' onKeyDown={this.keyDownHandler}></input>
             </div>

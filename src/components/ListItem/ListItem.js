@@ -15,16 +15,18 @@ class ListItem extends Component
 
   render()
   {
+    const doneClassForName = this.props.isDone ? ' doneName' : '';
+    const doneClassForBG = this.props.isDone ? ' doneBG' : '';
     return (
-        <div className='ListItem-container'>
+        <div className={'ListItem-container' + doneClassForBG}>
             <div className='doneDiv' onClick={this.doneBtnHandler}>
                 <span className='doneBtn'>
                     <FontAwesomeIcon icon='check'/>
                 </span>
             </div>
             <div className='separator'></div>
-            <div className={'taskName'}>
-                <span className={ this.props.isDone ? 'done' : '' }>{ this.props.name }</span>
+            <div className='taskName'>
+                <span className={ doneClassForName }>{ this.props.name }</span>
             </div> 
         </div>
     )

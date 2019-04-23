@@ -1,3 +1,6 @@
+%defaultClearBtn
+    
+
 .TodoList-container
     display: flex
     flex-direction: column
@@ -5,12 +8,12 @@
     .clearBtn
         height: 50px
         width: 50px
-        position: absolute
-        margin-left: -80px 
-        margin-top: 10px
         border-radius: 50%
         background-color: #dd4881
         display: flex
+        position: absolute
+        margin-left: -80px 
+        margin-top: 10px
         justify-content: center
         align-items: center
         color: #ffffff
@@ -18,7 +21,7 @@
         &:hover
             background-color: #c64778 
         &:active
-            background-color: #a83460 
+            background-color: #a83460
 
     .taskCreator
         height: 60px
@@ -35,7 +38,11 @@
 
 @media screen and (max-width: 600px)
     .clearBtn
-        position: fixed
+        position: fixed !important
         bottom: 30px
         right: 30px
+        width: 80px !important
+        height: 80px !important
+        font-size: 24px
         box-shadow: 3px 3px 3px -3px rgba(0,0,0,0.72)
+        
