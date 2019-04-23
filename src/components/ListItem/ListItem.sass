@@ -1,5 +1,3 @@
-.doneBG
-    background-color: #1dc96e
 .ListItem-container
     display: flex
     flex-direction: row
@@ -11,7 +9,7 @@
 
     .doneDiv
         height: 100%
-        width: 50px
+        min-width: 50px
         display: flex
         flex-direction: column
         justify-content: center
@@ -26,9 +24,12 @@
         .doneBtn
             width: 100%
             text-align: center
+            
+        .doneBG
+            color: #1dc96e
 
     .separator
-        width: 1px
+        min-width: 1px
         height: 80%
         background-color: #e9e9e9
 
@@ -39,7 +40,17 @@
         justify-content: center
         align-items: center
         flex: 1
-        span 
+
+        // хардкод, нужны правки
+        p
+            font-size: 12px
+            width: 440px
             text-align: center
+            overflow: hidden !important
+            white-space: nowrap
+            -webkit-line-break: 2
+            -webkit-line-clamp: 2 /* number of lines to show */
+            text-overflow: ellipsis
+
         .doneName
             text-decoration: line-through
