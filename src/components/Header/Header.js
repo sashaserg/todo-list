@@ -1,5 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import './Header.sass';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Link } from "react-router-dom";
 
 class Header extends Component
 {
@@ -8,7 +10,12 @@ class Header extends Component
     return (
         <div className='Header-container'>
             <div className='content'>
-              <p className='headerText'>ToDo List</p>
+              <div className='homeIcon'>
+                <Link to={'/'}>
+                  <FontAwesomeIcon icon='home' className='icon'/>
+                </Link>
+              </div>
+              <p className='headerText'>Be Organazied</p>
             </div>
         </div>
     )

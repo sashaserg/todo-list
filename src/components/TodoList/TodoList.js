@@ -74,11 +74,12 @@ class TodoList extends Component
             </div>
 
             <div className='taskCreator'>
-              <input placeholder='+  Add new item' onKeyDown={this.keyDownHandler}></input>
+              <input placeholder='+  Add new task' onKeyDown={this.keyDownHandler}></input>
             </div>
             <div className='tasks'>
               { this.renderTasks() }
             </div>
+
         </div>
     )
   }

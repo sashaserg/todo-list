@@ -2,4 +2,8 @@
 body {
     background: #f6f9fb;
     font-family: 'Montserrat', sans-serif;
+    min-width: 400px;
+}
+#root {
+    height: 100%;
 }
