@@ -1,2 +1,61 @@
 .ShoppingListItem-container
-    
+    width: 100%
+    height: 40px
+    display: flex
+    margin-bottom: 18px 
+
+    div
+        display: flex
+        align-items: center
+    .buttonPanel
+        // margin-right: 
+        .buttonField
+            height: 100%
+            margin-right: 8px
+            border-radius: 50%
+            width: 40px
+            display: flex
+            justify-content: center
+            box-sizing: border-box
+            cursor: pointer
+        .acceptIcon
+            border: 2px #1dc96e solid
+            color: #1dc96e
+            &:hover
+                background-color: #1dc96e
+                color: #ffffff
+        .removeIcon
+            border: 2px #f66969 solid
+            color: #f66969
+            &:hover
+                background-color: #f66969
+                color: #ffffff
+        .doneBtn
+            background-color: #1dc96e
+            color: #ffffff
+            &:hover
+                background-color: #ffffff
+                color: #1dc96e
+            
+    .inputPanel
+        flex: 1
+        border-radius: 5px
+        .inputField
+            height: 100%
+            width: 80px
+            border-bottom: 1px #713ef0 solid
+            margin-right: 5px
+            &:last-child
+                margin-right: 0
+            input
+                height: 90%
+                width: 100%
+                background-color: inherit
+                border: none
+                color: #474a4b
+                box-sizing: border-box
+                padding-left: 5px
+                font-size: 14px
+                
+        .nameField
+            flex: 1

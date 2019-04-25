@@ -37,17 +37,26 @@
                 width: 100%
                 background-color: inherit
                 border: none
+                color: #474a4b
 
+            .rc-input-number
+                height: 100%
+                .rc-input-number-input-wrap
+                    height: 100%
+
+    .itemPanel
+        margin-top: 16px
     .controlPanel
         display: flex
         flex-direction: column
-        position: absolute
+        position: fixed
         right: 32px
         bottom: 32px
         background-color: #dd4881
         padding: 8px 16px
         border-radius: 5px
         width: 120px
+        cursor: pointer
 
         .controlRow
             height: 40px
@@ -68,10 +77,10 @@
                 justify-content: right
                 input
                     border-radius: 5px
-                    padding-right: 5px
                     text-align: right
                     height: 90%
                     width: 100%
+                    padding-right: 5px
                     // background-color: inherit
                     border: none
             

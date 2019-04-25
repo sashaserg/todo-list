@@ -15,7 +15,7 @@ class Header extends Component
                   <FontAwesomeIcon icon='home' className='icon'/>
                 </Link>
               </div>
-              <p className='headerText'>Be Organazied</p>
+              <p className='headerText'>Be Organized</p>
             </div>
         </div>
     )

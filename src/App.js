@@ -8,8 +8,8 @@ import ShoppingListWindow from './views/ShoppingListWindow/ShoppingListWindow.js
 import NotFound from './views/NotFound/NotFound';
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheck, faTrashAlt, faHome,  faShoppingBag, faWallet, faShoppingBasket, faListOl, faSmile } from '@fortawesome/free-solid-svg-icons'
-library.add( faCheck, faTrashAlt, faHome, faShoppingBag, faWallet, faShoppingBasket, faListOl, faSmile  );
+import { faCheck, faTrashAlt, faHome,  faShoppingBag, faWallet, faShoppingBasket, faListOl, faSmile, faTimes } from '@fortawesome/free-solid-svg-icons'
+library.add( faCheck, faTrashAlt, faHome, faShoppingBag, faWallet, faShoppingBasket, faListOl, faSmile, faTimes  );
 
 class App extends Component {
   render() {
