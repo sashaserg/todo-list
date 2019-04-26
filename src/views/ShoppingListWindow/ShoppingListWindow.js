@@ -2,8 +2,10 @@ import React, {Component, PropTypes} from 'react';
 import './ShoppingListWindow.sass';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import NumberFormat from 'react-number-format';
-import ShoppingListItem from '../../components/ShoppingListItem/ShoppingListItem.js'
+import ShoppingListItem from '../../components/ShoppingListItem/ShoppingListItem.js';
+import WhiteShoppingListItem from '../../components/WhiteShoppingListItem/WhiteShoppingListItem.js';
 import Draggable, {DraggableCore} from 'react-draggable';
+import ReactTooltip from 'react-tooltip';
 
 class ShoppingListWindow extends Component
 {
@@ -59,37 +61,87 @@ class ShoppingListWindow extends Component
     }
   }
 
-  shopItemDoneHandler = (itemIndex, { fName, fAmount, fCost }) => {
+
+  checkBudgetSpent = () => {
+    console.log('spent: ', this.state.spent, 'budget: ', this.state.budget)
+    
+    if ( this.state.spent > this.state.budget ) {
+      
+      // Set Tooltip disable to false to show it. 
+      document.getElementById('controlPanel').setAttribute('data-tip-disable', false)
+      ReactTooltip.show(document.getElementById('controlPanel'));
+      setTimeout(() => { 
+        ReactTooltip.hide(document.getElementById('controlPanel'));
+        // Set Tooltip disable to true to prevent hover-show. 
+        document.getElementById('controlPanel').setAttribute('data-tip-disable', true) 
+      }, 0);
+    }
+  }
+
+  shopItemDoneHandler = ( itemIndex ) => {
     const newShopItems = this.state.shopItems;
 
-    const shopItem = newShopItems[itemIndex];
+    const shopItem = newShopItems[ itemIndex ];
     shopItem.isDone = !shopItem.isDone;
+    let sumAddToSpent = shopItem.cost * shopItem.amount;
+
+    // If we change done to undone, we should subtract amount*cost from total spent
+    if( !shopItem.isDone ) sumAddToSpent *= -1;
 
     this.setState({
-        spent: this.state.spent + shopItem.cost * shopItem.amount,
         shopItems: newShopItems,
+        spent: this.state.spent + sumAddToSpent,
+    }, () => this.checkBudgetSpent() );
+
+  }
+
+  shopItemRemoveHandler = ( itemIndex ) => {
+    const newShopItems = this.state.shopItems;
+    const shopItem = newShopItems[ itemIndex ];
+    const subtractFromSpent = shopItem.isDone ? shopItem.cost * shopItem.amount : 0;
+
+    newShopItems.splice( itemIndex, 1 );
+    console.log(newShopItems);
+
+    this.setState({
+      spent: this.state.spent - subtractFromSpent,
+      shopItems: newShopItems, 
     });
   }
 
-  shopItemInputChangeHandler = (itemIndex) => {
+  shopItemChangeHandler = ( itemIndex, fieldName, newValue ) => {
     const newShopItems = this.state.shopItems;
+    
+    // Create copy of item before updating withour object reference.
+    const oldShopItem = JSON.parse(JSON.stringify( newShopItems[ itemIndex ] ));
+    let sumAddToSpent = 0;
 
-    // this.setState({
-    //     [e.target.name]: e.target.value
-    // });
+    newShopItems[ itemIndex ][ fieldName ] = newValue;
+
+    if( oldShopItem.isDone )
+      sumAddToSpent = newShopItems[itemIndex].amount * newShopItems[itemIndex].cost
+                      -
+                      oldShopItem.amount * oldShopItem.cost; 
+    this.setState({
+      shopItems: newShopItems,
+      spent: this.state.spent + sumAddToSpent,
+    }, () => this.checkBudgetSpent() );
+
   }
 
   renderShopItems = () => {
     return (
       <>
         { this.state.shopItems.map((item, index) => {
-          return <ShoppingListItem  key         = {index}
-                                    index       = {index}
-                                    name        = {item.name}
-                                    amount      = {item.amount}
-                                    cost        = {item.cost}
-                                    isDone      = {item.isDone}
-                                    doneHandler = {this.shopItemDoneHandler}/>
+          return <ShoppingListItem  key                 = {index}
+                                    index               = {index}
+                                    name                = {item.name}
+                                    amount              = {item.amount}
+                                    cost                = {item.cost}
+                                    isDone              = {item.isDone}
+                                    inputChangeHandler  = {this.shopItemChangeHandler}
+                                    doneHandler         = {this.shopItemDoneHandler}
+                                    removeHandler       = {this.shopItemRemoveHandler}/>
         })}
       </>
     );
@@ -148,11 +200,20 @@ class ShoppingListWindow extends Component
           </div>
 
           <div className='itemPanel'>
-            { this.renderShopItems() }
+            {/* { this.renderShopItems() } */}
+            {
+              <WhiteShoppingListItem/>
+            }
           </div>
 
           <Draggable cancel = "strong" bounds='body'>
-            <div className = 'controlPanel'>
+            <div className = 'controlPanel' data-tip id={'controlPanel'} data-tip-disable>
+              <ReactTooltip place     = "left" 
+                            type      = "warning" 
+                            effect    = "solid" 
+                            delayHide = {1800}>
+                <span>You spent more than in budget</span>
+              </ReactTooltip>
               <div className='controlRow'>
                 <div className='iconField'><FontAwesomeIcon icon='wallet'/></div>
                 <div className='numberField'>
@@ -162,12 +223,11 @@ class ShoppingListWindow extends Component
                                   allowNegative     = {false}
                                   value             = {this.state.budget}
                                   name              = {'budget'}
-                                  // prefix            = {'₴'}
-                                  prefix            = {'$'}
                                   onChange          = {this.headInputChangeHandler}
                                   placeholder       = {'Budget'}/>
                   </strong>
                 </div>
+                <div className='postfixField'><FontAwesomeIcon icon='dollar-sign'/></div>
               </div>
               <div className='controlRow'>
                 <div className='iconField'><FontAwesomeIcon icon='shopping-bag'/></div>
@@ -177,9 +237,9 @@ class ShoppingListWindow extends Component
                                 allowNegative     = {false}
                                 value             = {this.state.spent}
                                 displayType       = {'text'}
-                                prefix            = {'$'}
                                 defaultValue      = {0}/>
                 </div>
+                <div className='postfixField'><FontAwesomeIcon icon='dollar-sign'/></div>
               </div>
             </div>
           </Draggable>

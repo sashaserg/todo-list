@@ -11,18 +11,10 @@ class Main extends Component
       this.props.history.push( '/' + path );
     }
   }
-
+ 
   renderChooseWindow = () => {
     return (
       <div className='cardList'>
-        <div className='cardContainer'><OptionCard optionName   = {'ToDo List'}
-                                                   optionPath   = {'todoList'}
-                                                   optionIcon   = {'list-ol'}
-                                                   clickHandler = {this.optionCardClickHandler}/></div>
-        <div className='cardContainer'><OptionCard optionName   = {'Shopping List'}
-                                                   optionPath   = {'shoppingList'}
-                                                   optionIcon   = {'shopping-basket'}
-                                                   clickHandler = {this.optionCardClickHandler}/></div>
         <div className='cardContainer'><OptionCard optionName   = {'ToDo List'}
                                                    optionPath   = {'todoList'}
                                                    optionIcon   = {'list-ol'}

@@ -1,9 +1,9 @@
 import React, {Component, PropTypes} from 'react';
-import './ShoppingListItem.sass';
+import './WhiteShoppingListItem.sass';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import NumberFormat from 'react-number-format';
 
-class ShoppingListItem extends Component
+class WhiteShoppingListItem extends Component
 {
     doneBtnHandler = () => {
         this.props.doneHandler( this.props.index );
@@ -17,35 +17,28 @@ class ShoppingListItem extends Component
 
     render()
     {
-        const doneClassForBtn = this.props.isDone ? ' doneBtn' : '';
         return (
-            <div className={'ShoppingListItem-container'}>
+            <div className={'WhiteShoppingListItem-container'}>
                 <div className={'buttonPanel'}>
-                    <div className={'buttonField acceptIcon' + doneClassForBtn} onClick={this.doneBtnHandler}><FontAwesomeIcon icon={'check'}/></div>
-                    <div className={'buttonField removeIcon'} onClick={this.removeBtnHandler}><FontAwesomeIcon icon={'times'}/></div>
-                </div> 
+                    <div className={'buttonField'}><FontAwesomeIcon icon={'check'}/></div>
+                    <div className={'buttonField'}><FontAwesomeIcon icon={'times'}/></div>
+                </div>
                 <div className={'inputPanel'}>
                     <div className={'inputField nameField'}>
-                        <input  onChange     = {this.inputChangeHandler}
-                                onKeyDown    = {this.keyDownHandler}
-                                value        = {this.props.name}
+                        <input  value        = {123}
                                 name         = {'name'}/>
                     </div>
                     <div className={'inputField'}>
                         <NumberFormat   decimalScale    = {0} 
                                         allowNegative   = {false}
-                                        value           = {this.props.amount}
-                                        onChange        = {this.inputChangeHandler}
-                                        onKeyDown       = {this.keyDownHandler}
+                                        value           = {100}
                                         name            = {'amount'}/>
                     </div>
                     <div className={'inputField'}>
                         <NumberFormat   decimalScale        = {2}
                                         fixedDecimalScale   = {true} 
                                         allowNegative       = {false}
-                                        value               = {this.props.cost}
-                                        onChange            = {this.inputChangeHandler}
-                                        onKeyDown           = {this.keyDownHandler}
+                                        value               = {100}
                                         name                = {'cost'}/>
                     </div>
                 </div>
@@ -54,4 +47,4 @@ class ShoppingListItem extends Component
     }
 }
 
-export default ShoppingListItem;
+export default WhiteShoppingListItem;
