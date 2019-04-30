@@ -6,40 +6,55 @@ import NumberFormat from 'react-number-format';
 class WhiteShoppingListItem extends Component
 {
     doneBtnHandler = () => {
-        this.props.doneHandler( this.props.index );
+        this.props.doneHandler( this.props.id );
     }
     removeBtnHandler = () => {
-        this.props.removeHandler( this.props. index );
+        this.props.removeHandler( this.props.id );
     }
     inputChangeHandler = (e) => {
-        this.props.inputChangeHandler( this.props.index, e.target.name, e.target.value )
+        this.props.inputChangeHandler( this.props.id, e.target.name, e.target.value )
     }
 
     render()
     {
+        const doneClassForBtn = this.props.isDone ? ' doneBtn' : '';
+        const doneClassForInput = this.props.isDone ? ' doneInput' : '';
+
         return (
             <div className={'WhiteShoppingListItem-container'}>
                 <div className={'buttonPanel'}>
-                    <div className={'buttonField'}><FontAwesomeIcon icon={'check'}/></div>
-                    <div className={'buttonField'}><FontAwesomeIcon icon={'times'}/></div>
+                    <div className={'buttonField acceptIcon' + doneClassForBtn} onClick={this.doneBtnHandler}><FontAwesomeIcon icon={'check'}/></div>
+                    <div className={'buttonField removeIcon'} onClick={this.removeBtnHandler}><FontAwesomeIcon icon={'times'}/></div>
                 </div>
                 <div className={'inputPanel'}>
                     <div className={'inputField nameField'}>
-                        <input  value        = {123}
-                                name         = {'name'}/>
+                        <input  onChange     = {this.inputChangeHandler}
+                                onKeyDown    = {this.keyDownHandler}
+                                className    = {doneClassForInput} 
+                                value        = {this.props.name}
+                                name         = {'name'}
+                                disabled     = {this.props.isDone}/>
                     </div>
                     <div className={'inputField'}>
                         <NumberFormat   decimalScale    = {0} 
+                                        className       = {doneClassForInput}        
                                         allowNegative   = {false}
-                                        value           = {100}
-                                        name            = {'amount'}/>
+                                        value           = {this.props.amount}
+                                        onChange        = {this.inputChangeHandler}
+                                        onKeyDown       = {this.keyDownHandler}
+                                        name            = {'amount'}
+                                        disabled     = {this.props.isDone}/>
                     </div>
                     <div className={'inputField'}>
                         <NumberFormat   decimalScale        = {2}
+                                        className           = {doneClassForInput} 
                                         fixedDecimalScale   = {true} 
                                         allowNegative       = {false}
-                                        value               = {100}
-                                        name                = {'cost'}/>
+                                        value               = {this.props.cost}
+                                        onChange            = {this.inputChangeHandler}
+                                        onKeyDown           = {this.keyDownHandler}
+                                        name                = {'cost'}
+                                        disabled     = {this.props.isDone}/>
                     </div>
                 </div>
             </div>

@@ -10,7 +10,7 @@ class ListItem extends Component
     }
 
     doneBtnHandler = () => {
-        this.props.doneHandler( this.props.index );
+        this.props.doneHandler( this.props.id );
     }
 
   render()

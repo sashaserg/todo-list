@@ -2,16 +2,42 @@ import React, {Component, PropTypes} from 'react';
 import './TodoList.sass';
 import ListItem from '../ListItem/ListItem.js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import firebase from '../../firebase.js';
 
 class TodoList extends Component
 {
   constructor(props) {
     super(props);
     this.state = {
+      headName: '',
       tasks: [],
     }
 
     // this.taskDoneHandler = this.taskDoneHandler.bind(this);
+  }
+
+  componentDidMount () {
+    const itemsRef = firebase.database().ref('TodoList').child('Task');
+    itemsRef.on('value', (snapshot) => {
+      let tasks = snapshot.val();
+      let newTasks = [];
+      for (let task in tasks) {
+        newTasks.push({
+          id: task,
+          name: tasks[task].name,
+          isDone: tasks[task].isDone,
+        });
+      }
+      this.setState({
+        tasks: newTasks,
+      });
+    });
+  }
+
+  inputChangeHandler = (e) => {
+    this.setState({
+      [e.target.name]: e.target.value,
+    })
   }
 
   taskDoneHandler = ( taskIndex ) => {
@@ -24,15 +50,23 @@ class TodoList extends Component
     console.log( this.state.tasks );
   }
 
+  taskDoneFireBaseHandler = ( taskId ) => {
+    const itemRef = firebase.database().ref(`/TodoList/Task/${taskId}`);
+    itemRef.update({
+      isDone: true,
+    })
+  }
+
   renderTasks = () => {
     return(
       <>{
         this.state.tasks.map(( item, index ) => {
           return <ListItem key          = { index } 
+                           id           = { item.id }
                            name         = { item.name } 
                            isDone       = { item.isDone }
                            index        = { index }
-                           doneHandler  = { this.taskDoneHandler }/>
+                           doneHandler  = { this.taskDoneFireBaseHandler }/>
         })
       }</>
     )
@@ -40,21 +74,23 @@ class TodoList extends Component
 
   keyDownHandler = (e) => {
     if (e.key === 'Enter') {
-      const taskName = e.target.value;
-      const newTask = {
-        isDone: false,
-        name: taskName,
-      }
-
-      const newTasks = this.state.tasks;
-      newTasks.push(newTask);
-
-      this.setState({
-        tasks: newTasks
-      });
-
-      e.target.value = '';
+      this.addNewTaskFireBase();
     }
+  }
+
+  addNewTaskFireBase = () => {
+    const itemsRef = firebase.database().ref('TodoList').child('Task');
+    const taskName = this.state.headName;
+    const newTask = {
+      isDone: false,
+      name: taskName,
+    }
+
+    itemsRef.push(newTask);
+
+    this.setState({
+      headName: '',
+    });
   }
 
   clearTaskHandler = () => {
@@ -64,17 +100,27 @@ class TodoList extends Component
       }); 
   }
 
+  clearTaskFireBaseHandler = () => {
+    const itemsRef = firebase.database().ref('TodoList').child('Task');
+    if (itemsRef)
+      itemsRef.remove();
+  }
+
   render()
   {
     return (
         <div className='TodoList-container'>
 
-            <div className='clearBtn' onClick={this.clearTaskHandler}>
+            <div className='clearBtn' onClick={this.clearTaskFireBaseHandler}>
               <FontAwesomeIcon icon='trash-alt'/>
             </div>
 
             <div className='taskCreator'>
-              <input placeholder='+  Add new task' onKeyDown={this.keyDownHandler}></input>
+              <input  placeholder = '+  Add new task' 
+                      value       = {this.state.headName}
+                      onKeyDown   = {this.keyDownHandler}
+                      onChange    = {this.inputChangeHandler}
+                      name        = {'headName'}/>
             </div>
             <div className='tasks'>
               { this.renderTasks() }
