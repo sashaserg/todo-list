@@ -19,9 +19,10 @@ class WhiteShoppingListItem extends Component
     {
         const doneClassForBtn = this.props.isDone ? ' doneBtn' : '';
         const doneClassForInput = this.props.isDone ? ' doneInput' : '';
+        const doneClassForContainer = this.props.isDone ? ' doneContainer' : '';
 
         return (
-            <div className={'WhiteShoppingListItem-container'}>
+            <div className={'WhiteShoppingListItem-container' + doneClassForContainer}>
                 <div className={'buttonPanel'}>
                     <div className={'buttonField acceptIcon' + doneClassForBtn} onClick={this.doneBtnHandler}><FontAwesomeIcon icon={'check'}/></div>
                     <div className={'buttonField removeIcon'} onClick={this.removeBtnHandler}><FontAwesomeIcon icon={'times'}/></div>

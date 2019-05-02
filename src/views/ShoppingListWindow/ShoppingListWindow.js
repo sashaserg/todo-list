@@ -25,6 +25,21 @@ class ShoppingListWindow extends Component
 
   componentDidMount() {
     const itemsRef = firebase.database().ref('ShoppingList');
+
+    itemsRef.once('value', (snapshot) => {
+      if (snapshot.val() == null)
+        itemsRef.set({
+          spent: 0,
+        });
+      if (snapshot.val().spent == null)
+      {
+        itemsRef.update({
+          spent: 0,
+        })
+      }
+
+    });
+    
     itemsRef.on('value', (snapshot) => {
       if (snapshot.val())
       {
@@ -143,7 +158,7 @@ class ShoppingListWindow extends Component
 
 
   checkBudgetSpent = () => {
-    console.log('spent: ', this.state.spent, 'budget: ', this.state.budget)
+    // console.log('spent: ', this.state.spent, 'budget: ', this.state.budget)
     
     if ( this.state.spent > this.state.budget ) {
       
@@ -175,10 +190,11 @@ class ShoppingListWindow extends Component
 
   }
 
+  // Handler for item done button. Updating item isDone status and spent. 
   shopItemDoneFireBaseHandler = ( itemId ) => {
     const itemRef = firebase.database().ref('ShoppingList');
 
-    itemRef.once('value').then(function(snapshot) {
+    itemRef.once('value').then( (snapshot) => {
       const itemIsDone = !snapshot.val().ShoppingItem[itemId].isDone;
       const spent = snapshot.val().spent;
       let sumAddToSpent = snapshot.val().ShoppingItem[itemId].cost *
@@ -187,13 +203,13 @@ class ShoppingListWindow extends Component
       // If we change done to undone, we should subtract amount*cost from total spent
       if( !itemIsDone ) sumAddToSpent *= -1;
 
-      itemRef.child('ShoppingItem').child(itemId).update({
+      itemRef.child('ShoppingItem').child( itemId ).update({
         isDone: itemIsDone
       });
 
       itemRef.update({
         spent: spent + sumAddToSpent,
-      });
+      }, () => this.checkBudgetSpent());
 
     });
 
@@ -224,7 +240,7 @@ class ShoppingListWindow extends Component
     const subtractFromSpent = shopItem.isDone ? shopItem.cost * shopItem.amount : 0;
 
     newShopItems.splice( itemIndex, 1 );
-    console.log(newShopItems);
+    // console.log(newShopItems);
 
     this.setState({
       spent: this.state.spent - subtractFromSpent,
@@ -232,9 +248,10 @@ class ShoppingListWindow extends Component
     });
   }
 
+  // Remove shopItem from firebase and check budget and spent. 
   shopItemRemoveFromFirebaseHandler = ( itemId ) => {
     const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
-    itemRef.remove();
+    itemRef.remove(() => this.checkBudgetSpent());
   }
 
   shopItemChangeHandler = ( itemIndex, fieldName, newValue ) => {
@@ -257,6 +274,7 @@ class ShoppingListWindow extends Component
 
   }
 
+  // Update changed data in shopItem in firebase.
   shopItemChangeFireBaseHandler = ( itemId, fieldName, fieldValue ) => {
     const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
     itemRef.update({
@@ -283,18 +301,29 @@ class ShoppingListWindow extends Component
     );
   }
 
+  // Handler for budget input's onChange.
+  budgetChangeFireBaseHandler = (e) => {
+    const listRef = firebase.database().ref('ShoppingList');
+    listRef.update({
+      budget: parseFloat(e.target.value),
+    })
+  }
+
+  // Handler for headInput onChange. Value type - string.  
   headInputStringChangeHandler = (e) => {
     this.setState({
         [e.target.name]: e.target.value
     });
   }
 
+  // Handler for headInput onChange. Value type - numeric.  
   headInputNumericChangeHandler = (e) => {
     this.setState({
         [e.target.name]: parseFloat( e.target.value ),
     });
   }
 
+  // Handler for inputs onKeyDown. If Enter -> add new item to firebase.
   headInputKeyDownHandler = (e) => {
     if (e.key === 'Enter') {
       this.addNewShopItemToFireBase();
@@ -357,7 +386,7 @@ class ShoppingListWindow extends Component
                                   allowNegative     = {false}
                                   value             = {this.state.budget}
                                   name              = {'budget'}
-                                  onChange          = {this.headInputChangeHandler}
+                                  onChange          = {this.budgetChangeFireBaseHandler}
                                   placeholder       = {'Budget'}/>
                   </strong>
                 </div>

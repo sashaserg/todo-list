@@ -3,6 +3,7 @@ import './Header.sass';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from "react-router-dom";
 
+
 class Header extends Component
 {
   render()
@@ -16,6 +17,10 @@ class Header extends Component
                 </Link>
               </div>
               <p className='headerText'>Be Organized</p>
+              <div className='authBlock'>
+                <button>Sign in</button>
+                <button>Sign out</button>
+            </div>
             </div>
         </div>
     )

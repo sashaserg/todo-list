@@ -41,7 +41,7 @@ class Main extends Component
   render()
   {
     const { component: ComponentToDisplay } = this.props;
-    return (
+    return ( 
         <div className='Main-container'>
               { ComponentToDisplay ? this.renderComponentToDisplay(ComponentToDisplay) : this.renderChooseWindow() }
         </div>
