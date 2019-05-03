@@ -1,11 +1,12 @@
+/* library */
 import React, {Component, PropTypes} from 'react';
+
+/* style */
 import './NotFound.sass';
-import { Link, Route } from "react-router-dom";
 
 class NotFound extends Component
 {
-  render()
-  {
+  render() {
     const { component: ComponentToDisplay } = this.props;
     return (
         <div className='NotFound-container'>

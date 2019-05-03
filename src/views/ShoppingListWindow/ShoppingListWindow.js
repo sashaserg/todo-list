@@ -1,16 +1,20 @@
+/* library */
 import React, {Component, PropTypes} from 'react';
-import './ShoppingListWindow.sass';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import NumberFormat from 'react-number-format';
-import ShoppingListItem from '../../components/ShoppingListItem/ShoppingListItem.js';
-import WhiteShoppingListItem from '../../components/WhiteShoppingListItem/WhiteShoppingListItem.js';
 import Draggable, {DraggableCore} from 'react-draggable';
 import ReactTooltip from 'react-tooltip';
-import firebase from '../../firebase.js';
-import { observer } from 'mobx-react';
-import ShoppingListStore from '../../stores/ShoppingListStore.js'
 import { ClipLoader } from 'react-spinners';
+import { observer, inject } from 'mobx-react';
 
+/* component */
+import WhiteShoppingListItem from '../../components/WhiteShoppingListItem/WhiteShoppingListItem.js';
+
+/* style */
+import './ShoppingListWindow.sass';
+
+@inject('ShoppingListStore')
+@inject('AuthStore')
 @observer
 class ShoppingListWindow extends Component
 {
@@ -24,60 +28,13 @@ class ShoppingListWindow extends Component
   }
 
   componentDidMount() {
-    // const itemsRef = firebase.database().ref('ShoppingList');
+    // this.props.ShoppingListStore.fetchShoppingList();
+    const uid = this.props.AuthStore.user.uid;
 
-    // itemsRef.once('value', (snapshot) => {
-    //   if (snapshot.val() == null)
-    //     itemsRef.set({
-    //       spent: 0,
-    //     });
-    //   if (snapshot.val().spent == null)
-    //   {
-    //     itemsRef.update({
-    //       spent: 0,
-    //     })
-    //   }
-
-    // });
-    
-    // itemsRef.on('value', (snapshot) => {
-    //   if (snapshot.val())
-    //   {
-    //     let items = snapshot.val().ShoppingItem;
-    //     let newShopItems = [];
-    //     for (let item in items) {
-    //       newShopItems.push({
-    //         id: item,
-    //         name: items[item].name,
-    //         amount: items[item].amount,
-    //         cost: items[item].cost,
-    //         isDone: items[item].isDone,
-    //       });
-    //     };
-
-    //     const budget = snapshot.val().budget;
-    //     const spent = snapshot.val().spent;
-
-    //     this.setState({
-    //       shopItems: newShopItems,
-    //       budget,
-    //       spent
-    //     });
-    //   }
-    // });
-
-    // itemsRef.child('ShoppingItem').on('child_removed', (oldChild) => {
-    //   if (oldChild.val().isDone)
-    //     itemsRef.once('value')
-    //       .then((snapshot) => {
-    //         const oldSpent = snapshot.val().spent;
-    //         itemsRef.update({
-    //           spent: oldSpent - oldChild.val().amount * oldChild.val().cost,
-    //         })
-    //       })
-    // });
+    this.props.ShoppingListStore.findShoppingListByUserId(uid);
   }
 
+  // Add new shop item to firebase using data from state.
   addNewShopItemToFireBase = () => {
     const name = this.state.headName;
     const amount = this.state.headAmount;
@@ -85,64 +42,26 @@ class ShoppingListWindow extends Component
 
     if( name && amount && cost )
     {
-      const itemsRef = firebase.database().ref('ShoppingList').child('ShoppingItem');
-      const item = {
+      const newItem = {
         name,
         amount,
-        cost,
-        isDone: false,
-      };
-
-      itemsRef.push(item);
-
-      this.setState({
-        headName: '',
-        headAmount: null,
-        headCost: null,
-      });
-
-      // After success focus on Head Name Field
-      document.getElementsByName('headName')[0].focus();
-    }
-    else {
-
-      // Focus on first empty input with div className='headInput'
-      const emptyInputs = Array.from(document.getElementsByClassName('headInput')).filter((item) => {
-        if(!item.firstChild.value && item.firstChild.nodeName == 'INPUT'){
-          return true
-        }
-      });
-      emptyInputs[0].firstChild.focus();
-    }
-  }
-
-  addNewShopItemFromState = () => {
-    const name = this.state.headName;
-    const amount = this.state.headAmount;
-    const cost = this.state.headCost;
-
-    if( name && amount && cost )
-    {
-      const newShopItem = {
-        name,
-        amount,
-        cost,
+        cost, 
         isDone: false,
       }
-  
-      const newShopItems = this.state.shopItems;
-      newShopItems.push(newShopItem);
-  
-      this.setState({
-        shopItems: newShopItems,
-  
-        headName: '',
-        headAmount: null,
-        headCost: null,
-      });
-
-      // After success focus on Head Name Field
-      document.getElementsByName('headName')[0].focus();
+      // this.props.ShoppingListStore.addNewShopItemUserId( this.props.AuthStore.user.uid );
+      this.props.ShoppingListStore.addNewShopItem( newItem )
+        .then(() => {
+          document.getElementsByName('headName')[0].focus();
+          // After success set head state to null and focus on Head Name Field.
+          this.setState({
+            headName: '',
+            headAmount: null,
+            headCost: null,
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });  
     }
     else {
 
@@ -156,11 +75,11 @@ class ShoppingListWindow extends Component
     }
   }
 
-
+  // Check budget and spent. If spent > budget, show tooltip with warning.
   checkBudgetSpent = () => {
-     console.log('spent: ', ShoppingListStore.spent, 'budget: ', ShoppingListStore.budget)
+     console.log('spent: ', this.props.ShoppingListStore.spent, 'budget: ', this.props.ShoppingListStore.budget)
     
-    if ( ShoppingListStore.spent > ShoppingListStore.budget ) {
+    if ( this.props.ShoppingListStore.spent > this.props.ShoppingListStore.budget ) {
       
       // Set Tooltip disable to false to show it. 
       document.getElementById('controlPanel').setAttribute('data-tip-disable', false)
@@ -173,99 +92,32 @@ class ShoppingListWindow extends Component
     }
   }
 
-  shopItemDoneHandler = ( itemIndex ) => {
-    const newShopItems = this.state.shopItems;
-
-    const shopItem = newShopItems[ itemIndex ];
-    shopItem.isDone = !shopItem.isDone;
-    let sumAddToSpent = shopItem.cost * shopItem.amount;
-
-    // If we change done to undone, we should subtract amount*cost from total spent
-    if( !shopItem.isDone ) sumAddToSpent *= -1;
-
-    this.setState({
-        shopItems: newShopItems,
-        spent: this.state.spent + sumAddToSpent,
-    }, () => this.checkBudgetSpent() );
-
-  }
-
-  // Handler for item done button. Updating item isDone status and spent. 
+  // Handler for item done button. Updating item's isDone status and global spent. 
   shopItemDoneFireBaseHandler = ( itemId ) => {
-    const itemRef = firebase.database().ref('ShoppingList');
-
-    itemRef.once('value').then( (snapshot) => {
-      const itemIsDone = !snapshot.val().ShoppingItem[itemId].isDone;
-      const spent = snapshot.val().spent;
-      let sumAddToSpent = snapshot.val().ShoppingItem[itemId].cost *
-                          snapshot.val().ShoppingItem[itemId].amount;
-                    
-      // If we change done to undone, we should subtract amount*cost from total spent
-      if( !itemIsDone ) sumAddToSpent *= -1;
-
-      itemRef.child('ShoppingItem').child( itemId ).update({
-        isDone: itemIsDone
-      });
-
-      itemRef.update({
-        spent: spent + sumAddToSpent,
-      }, () => this.checkBudgetSpent());
-
-    });
-  }
-
-  shopItemRemoveHandler = ( itemIndex ) => {
-    const newShopItems = this.state.shopItems;
-    const shopItem = newShopItems[ itemIndex ];
-    const subtractFromSpent = shopItem.isDone ? shopItem.cost * shopItem.amount : 0;
-
-    newShopItems.splice( itemIndex, 1 );
-    // console.log(newShopItems);
-
-    this.setState({
-      spent: this.state.spent - subtractFromSpent,
-      shopItems: newShopItems, 
-    });
+    this.props.ShoppingListStore.updateIsDoneShopItem( itemId )
+      .then(() => {
+        this.checkBudgetSpent();
+      })
   }
 
   // Remove shopItem from firebase and check budget and spent. 
   shopItemRemoveFromFirebaseHandler = ( itemId ) => {
-    const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
-    itemRef.remove(() => this.checkBudgetSpent());
-  }
-
-  shopItemChangeHandler = ( itemIndex, fieldName, newValue ) => {
-    const newShopItems = this.state.shopItems;
-    
-    // Create copy of item before updating without object reference.
-    const oldShopItem = JSON.parse(JSON.stringify( newShopItems[ itemIndex ] ));
-    let sumAddToSpent = 0;
-
-    newShopItems[ itemIndex ][ fieldName ] = newValue;
-
-    if( oldShopItem.isDone )
-      sumAddToSpent = newShopItems[itemIndex].amount * newShopItems[itemIndex].cost
-                      -
-                      oldShopItem.amount * oldShopItem.cost; 
-    this.setState({
-      shopItems: newShopItems,
-      spent: this.state.spent + sumAddToSpent,
-    }, () => this.checkBudgetSpent() );
-
+    this.props.ShoppingListStore.removeShopItem( itemId )
+      .then(() => {
+        this.checkBudgetSpent();
+      })
   }
 
   // Update changed data in shopItem in firebase.
   shopItemChangeFireBaseHandler = ( itemId, fieldName, fieldValue ) => {
-    const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
-    itemRef.update({
-      [fieldName]: fieldValue 
-    });
+    this.props.ShoppingListStore.updateShopItem( itemId, fieldName, fieldValue );
   }
 
+  // Render shopping items from ShoppingListStore. 
   renderShopItems = () => {
     return (
       <>
-        { ShoppingListStore.shopItems.map((item, index) => {
+        { this.props.ShoppingListStore.shopItems.map((item, index) => {
           return <WhiteShoppingListItem   key                 = {index}
                                           index               = {index}
                                           id                  = {item.id}
@@ -281,9 +133,10 @@ class ShoppingListWindow extends Component
     );
   }
 
+  // Render spinner with loading props as true.
   renderSpinner = () => {
     return(
-      <ClipLoader
+        <ClipLoader
           sizeUnit={"px"}
           size={100}
           color={'#123abc'}
@@ -291,12 +144,17 @@ class ShoppingListWindow extends Component
         />
     );
   }
+
   // Handler for budget input's onChange.
   budgetChangeFireBaseHandler = (e) => {
-    const listRef = firebase.database().ref('ShoppingList');
-    listRef.update({
-      budget: parseFloat(e.target.value),
-    })
+    const newBudget = parseFloat( e.target.value );
+    this.props.ShoppingListStore.updateBudget( newBudget )
+      .then(() => {
+        this.checkBudgetSpent();
+      })
+      .catch((err) => {
+        console.log(err);
+      })
   }
 
   // Handler for headInput onChange. Value type - string.  
@@ -320,8 +178,7 @@ class ShoppingListWindow extends Component
     }
   }
 
-  render()
-  {
+  render() {
     return (
         <div className='ShoppingListWindow-container'>  
           <div className='headPanel'>
@@ -356,7 +213,8 @@ class ShoppingListWindow extends Component
           </div>
 
           <div className='itemPanel'>
-            { !ShoppingListStore.isFetching ? this.renderShopItems() : this.renderSpinner() }
+            { !this.props.ShoppingListStore.isFetching && this.props.ShoppingListStore.shopItems  ? this.renderShopItems() 
+                                                                                                  : this.renderSpinner() }
           </div>
 
           <Draggable cancel = "strong" bounds='body'>
@@ -374,7 +232,7 @@ class ShoppingListWindow extends Component
                     <NumberFormat decimalScale      = {2} 
                                   fixedDecimalScale = {true} 
                                   allowNegative     = {false}
-                                  value             = {ShoppingListStore.budget}
+                                  value             = {this.props.ShoppingListStore.budget}
                                   name              = {'budget'}
                                   onChange          = {this.budgetChangeFireBaseHandler}
                                   placeholder       = {'Budget'}/>
@@ -388,7 +246,7 @@ class ShoppingListWindow extends Component
                   <NumberFormat decimalScale      = {2} 
                                 fixedDecimalScale = {true} 
                                 allowNegative     = {false}
-                                value             = {ShoppingListStore.spent}
+                                value             = {this.props.ShoppingListStore.spent}
                                 displayType       = {'text'}
                                 defaultValue      = {0}/>
                 </div>

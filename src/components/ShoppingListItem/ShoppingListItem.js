@@ -1,7 +1,10 @@
+/* library */
 import React, {Component, PropTypes} from 'react';
-import './ShoppingListItem.sass';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import NumberFormat from 'react-number-format';
+
+/* style */
+import './ShoppingListItem.sass';
 
 class ShoppingListItem extends Component
 {
@@ -15,8 +18,7 @@ class ShoppingListItem extends Component
         this.props.inputChangeHandler( this.props.index, e.target.name, e.target.value )
     }
 
-    render()
-    {
+    render() {
         const doneClassForBtn = this.props.isDone ? ' doneBtn' : '';
         return (
             <div className={'ShoppingListItem-container'}>

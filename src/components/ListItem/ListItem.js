@@ -1,6 +1,9 @@
-import React, {Component, PropTypes} from 'react';
-import './ListItem.sass';
+/* library */
+import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+/* style */
+import './ListItem.sass';
 
 class ListItem extends Component
 {
@@ -13,8 +16,7 @@ class ListItem extends Component
         this.props.doneHandler( this.props.id );
     }
 
-  render()
-  {
+  render() {
     const doneClassForName = this.props.isDone ? ' doneName' : '';
     const doneClassForBG = this.props.isDone ? ' doneBG' : '';
     return (

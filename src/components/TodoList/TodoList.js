@@ -1,37 +1,28 @@
+/* library */
 import React, {Component, PropTypes} from 'react';
-import './TodoList.sass';
-import ListItem from '../ListItem/ListItem.js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import firebase from '../../firebase.js';
+import { observer, inject } from 'mobx-react';
 
+/* style */
+import './TodoList.sass';
+
+/* component */
+import ListItem from '../ListItem/ListItem.js'
+
+
+@inject('TodoListStore')
+@observer
 class TodoList extends Component
 {
   constructor(props) {
     super(props);
     this.state = {
       headName: '',
-      tasks: [],
     }
-
-    // this.taskDoneHandler = this.taskDoneHandler.bind(this);
   }
 
   componentDidMount () {
-    const itemsRef = firebase.database().ref('TodoList').child('Task');
-    itemsRef.on('value', (snapshot) => {
-      let tasks = snapshot.val();
-      let newTasks = [];
-      for (let task in tasks) {
-        newTasks.push({
-          id: task,
-          name: tasks[task].name,
-          isDone: tasks[task].isDone,
-        });
-      }
-      this.setState({
-        tasks: newTasks,
-      });
-    });
+    this.props.TodoListStore.fetchTasks();
   }
 
   inputChangeHandler = (e) => {
@@ -40,27 +31,14 @@ class TodoList extends Component
     })
   }
 
-  taskDoneHandler = ( taskIndex ) => {
-    const updatedTasks = this.state.tasks;
-    updatedTasks[taskIndex].isDone = true;
-
-    this.setState({
-      tasks: updatedTasks,
-    })
-    console.log( this.state.tasks );
-  }
-
   taskDoneFireBaseHandler = ( taskId ) => {
-    const itemRef = firebase.database().ref(`/TodoList/Task/${taskId}`);
-    itemRef.update({
-      isDone: true,
-    })
+    this.props.TodoListStore.taskDone( taskId );
   }
 
   renderTasks = () => {
     return(
       <>{
-        this.state.tasks.map(( item, index ) => {
+        this.props.TodoListStore.tasks.map(( item, index ) => {
           return <ListItem key          = { index } 
                            id           = { item.id }
                            name         = { item.name } 
@@ -79,31 +57,22 @@ class TodoList extends Component
   }
 
   addNewTaskFireBase = () => {
-    const itemsRef = firebase.database().ref('TodoList').child('Task');
     const taskName = this.state.headName;
     const newTask = {
       isDone: false,
       name: taskName,
     }
 
-    itemsRef.push(newTask);
-
-    this.setState({
-      headName: '',
-    });
-  }
-
-  clearTaskHandler = () => {
-    if( this.state.tasks.length > 0 )
-      this.setState({
-        tasks: [],
-      }); 
+    this.props.TodoListStore.addTask( newTask )
+      .then(() => {
+        this.setState({
+          headName: '',
+        });
+      });
   }
 
   clearTaskFireBaseHandler = () => {
-    const itemsRef = firebase.database().ref('TodoList').child('Task');
-    if (itemsRef)
-      itemsRef.remove();
+    this.props.TodoListStore.removeAllTasks();
   }
 
   render()
@@ -123,7 +92,7 @@ class TodoList extends Component
                       name        = {'headName'}/>
             </div>
             <div className='tasks'>
-              { this.renderTasks() }
+              { this.props.TodoListStore.tasks ? this.renderTasks() : "no tasks" }
             </div>
 
         </div>

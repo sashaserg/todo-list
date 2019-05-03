@@ -1,9 +1,16 @@
+/* library */
 import React, {Component, PropTypes} from 'react';
-import './Main.sass';
 import { Link, Route } from "react-router-dom";
+import { observer } from 'mobx-react'
+
+/* component */
 import OptionCard from '../../components/OptionCard/OptionCard.js';
+
+/* store */
 import AuthStore from '../../stores/AuthStore.js';
-import { observer } from 'mobx-react';
+
+/* style */
+import './Main.sass';
 
 @observer
 class Main extends Component

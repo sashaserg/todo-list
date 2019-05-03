@@ -1,7 +1,9 @@
+/* library */
 import React, {Component, PropTypes} from 'react';
-import './OptionCard.sass';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { Link } from "react-router-dom";
+
+/* style */
+import './OptionCard.sass';
 
 class OptionCard extends Component
 {

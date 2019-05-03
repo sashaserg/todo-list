@@ -1,4 +1,7 @@
+/* library */
 import { observable, action } from "mobx";
+
+/* firebase */
 import firebase, { auth, provider } from '../firebase.js';
 
 class AuthStore {
@@ -12,7 +15,6 @@ class AuthStore {
     login() {
         auth.signInWithPopup(provider) 
             .then((result) => {
-                console.log(result.user);
                 const user = result.user;
                 this.user = user;
             });
