@@ -7,7 +7,11 @@ import WhiteShoppingListItem from '../../components/WhiteShoppingListItem/WhiteS
 import Draggable, {DraggableCore} from 'react-draggable';
 import ReactTooltip from 'react-tooltip';
 import firebase from '../../firebase.js';
+import { observer } from 'mobx-react';
+import ShoppingListStore from '../../stores/ShoppingListStore.js'
+import { ClipLoader } from 'react-spinners';
 
+@observer
 class ShoppingListWindow extends Component
 {
   constructor(props) {
@@ -16,66 +20,62 @@ class ShoppingListWindow extends Component
       headName: '',
       headAmount: null,
       headCost: null,
-      budget: 0,
-      spent: 0,
-      shopItems: [],
     };
-
   }
 
   componentDidMount() {
-    const itemsRef = firebase.database().ref('ShoppingList');
+    // const itemsRef = firebase.database().ref('ShoppingList');
 
-    itemsRef.once('value', (snapshot) => {
-      if (snapshot.val() == null)
-        itemsRef.set({
-          spent: 0,
-        });
-      if (snapshot.val().spent == null)
-      {
-        itemsRef.update({
-          spent: 0,
-        })
-      }
+    // itemsRef.once('value', (snapshot) => {
+    //   if (snapshot.val() == null)
+    //     itemsRef.set({
+    //       spent: 0,
+    //     });
+    //   if (snapshot.val().spent == null)
+    //   {
+    //     itemsRef.update({
+    //       spent: 0,
+    //     })
+    //   }
 
-    });
+    // });
     
-    itemsRef.on('value', (snapshot) => {
-      if (snapshot.val())
-      {
-        let items = snapshot.val().ShoppingItem;
-        let newShopItems = [];
-        for (let item in items) {
-          newShopItems.push({
-            id: item,
-            name: items[item].name,
-            amount: items[item].amount,
-            cost: items[item].cost,
-            isDone: items[item].isDone,
-          });
-        };
+    // itemsRef.on('value', (snapshot) => {
+    //   if (snapshot.val())
+    //   {
+    //     let items = snapshot.val().ShoppingItem;
+    //     let newShopItems = [];
+    //     for (let item in items) {
+    //       newShopItems.push({
+    //         id: item,
+    //         name: items[item].name,
+    //         amount: items[item].amount,
+    //         cost: items[item].cost,
+    //         isDone: items[item].isDone,
+    //       });
+    //     };
 
-        const budget = snapshot.val().budget;
-        const spent = snapshot.val().spent;
+    //     const budget = snapshot.val().budget;
+    //     const spent = snapshot.val().spent;
 
-        this.setState({
-          shopItems: newShopItems,
-          budget,
-          spent
-        });
-      }
-    });
+    //     this.setState({
+    //       shopItems: newShopItems,
+    //       budget,
+    //       spent
+    //     });
+    //   }
+    // });
 
-    itemsRef.child('ShoppingItem').on('child_removed', (oldChild) => {
-      if (oldChild.val().isDone)
-        itemsRef.once('value')
-          .then((snapshot) => {
-            const oldSpent = snapshot.val().spent;
-            itemsRef.update({
-              spent: oldSpent - oldChild.val().amount * oldChild.val().cost,
-            })
-          })
-    });
+    // itemsRef.child('ShoppingItem').on('child_removed', (oldChild) => {
+    //   if (oldChild.val().isDone)
+    //     itemsRef.once('value')
+    //       .then((snapshot) => {
+    //         const oldSpent = snapshot.val().spent;
+    //         itemsRef.update({
+    //           spent: oldSpent - oldChild.val().amount * oldChild.val().cost,
+    //         })
+    //       })
+    // });
   }
 
   addNewShopItemToFireBase = () => {
@@ -158,9 +158,9 @@ class ShoppingListWindow extends Component
 
 
   checkBudgetSpent = () => {
-    // console.log('spent: ', this.state.spent, 'budget: ', this.state.budget)
+     console.log('spent: ', ShoppingListStore.spent, 'budget: ', ShoppingListStore.budget)
     
-    if ( this.state.spent > this.state.budget ) {
+    if ( ShoppingListStore.spent > ShoppingListStore.budget ) {
       
       // Set Tooltip disable to false to show it. 
       document.getElementById('controlPanel').setAttribute('data-tip-disable', false)
@@ -212,26 +212,6 @@ class ShoppingListWindow extends Component
       }, () => this.checkBudgetSpent());
 
     });
-
-    // const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
-
-    // itemRef.once('value').then(function(snapshot) {
-    //   const itemIsDone = !snapshot.val().isDone;
-
-    //   let sumAddToSpent = snapshot.val().cost * snapshot.val().amount;
-
-    //   // If we change done to undone, we should subtract amount*cost from total spent
-    //   if( !itemIsDone ) sumAddToSpent *= -1;
-
-    //   itemRef.update({
-    //     isDone: itemIsDone,
-    //   });
-
-    //   this.setState({
-    //     spent: this.state.spent + sumAddToSpent,
-    //   });
-
-    // });
   }
 
   shopItemRemoveHandler = ( itemIndex ) => {
@@ -285,7 +265,7 @@ class ShoppingListWindow extends Component
   renderShopItems = () => {
     return (
       <>
-        { this.state.shopItems.map((item, index) => {
+        { ShoppingListStore.shopItems.map((item, index) => {
           return <WhiteShoppingListItem   key                 = {index}
                                           index               = {index}
                                           id                  = {item.id}
@@ -301,6 +281,16 @@ class ShoppingListWindow extends Component
     );
   }
 
+  renderSpinner = () => {
+    return(
+      <ClipLoader
+          sizeUnit={"px"}
+          size={100}
+          color={'#123abc'}
+          loading={true}
+        />
+    );
+  }
   // Handler for budget input's onChange.
   budgetChangeFireBaseHandler = (e) => {
     const listRef = firebase.database().ref('ShoppingList');
@@ -366,7 +356,7 @@ class ShoppingListWindow extends Component
           </div>
 
           <div className='itemPanel'>
-            { this.renderShopItems() }
+            { !ShoppingListStore.isFetching ? this.renderShopItems() : this.renderSpinner() }
           </div>
 
           <Draggable cancel = "strong" bounds='body'>
@@ -384,7 +374,7 @@ class ShoppingListWindow extends Component
                     <NumberFormat decimalScale      = {2} 
                                   fixedDecimalScale = {true} 
                                   allowNegative     = {false}
-                                  value             = {this.state.budget}
+                                  value             = {ShoppingListStore.budget}
                                   name              = {'budget'}
                                   onChange          = {this.budgetChangeFireBaseHandler}
                                   placeholder       = {'Budget'}/>
@@ -398,7 +388,7 @@ class ShoppingListWindow extends Component
                   <NumberFormat decimalScale      = {2} 
                                 fixedDecimalScale = {true} 
                                 allowNegative     = {false}
-                                value             = {this.state.spent}
+                                value             = {ShoppingListStore.spent}
                                 displayType       = {'text'}
                                 defaultValue      = {0}/>
                 </div>

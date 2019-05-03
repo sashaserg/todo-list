@@ -1,8 +1,11 @@
 import React, {Component, PropTypes} from 'react';
 import './Main.sass';
 import { Link, Route } from "react-router-dom";
-import OptionCard from '../../components/OptionCard/OptionCard.js'
+import OptionCard from '../../components/OptionCard/OptionCard.js';
+import AuthStore from '../../stores/AuthStore.js';
+import { observer } from 'mobx-react';
 
+@observer
 class Main extends Component
 {
 
@@ -38,12 +41,22 @@ class Main extends Component
     );
   }
 
+  renderAuthWarningBlock = () => {
+    return (
+      <div className={'content'}>
+        <p className={'authWarning'}>You must be loggin in to use the service.</p>
+      </div>
+    );
+  }
+
+  // If user isn't loggin in show the auth warning. Otherwise show the main component or component to display.
   render()
   {
     const { component: ComponentToDisplay } = this.props;
     return ( 
         <div className='Main-container'>
-              { ComponentToDisplay ? this.renderComponentToDisplay(ComponentToDisplay) : this.renderChooseWindow() }
+              { AuthStore.user ?  (ComponentToDisplay ? this.renderComponentToDisplay(ComponentToDisplay) : this.renderChooseWindow()) 
+                                  : this.renderAuthWarningBlock() }
         </div>
     )
   }
