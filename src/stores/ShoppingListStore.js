@@ -19,8 +19,10 @@ class ShoppingListStore {
         this.spent = 0;
     }
 
+    // Fetching shopping list by userId and setting listeners to value change and remove shopping item. 
     @action('fetch shop list by user id')
     findShoppingListByUserId(userId) {
+        console.log('userId from google', userId)
         const shopListRef = firebase.database().ref('ShoppingList');
         const query = shopListRef.orderByChild('userId').equalTo(userId);
 
@@ -30,154 +32,100 @@ class ShoppingListStore {
                     userId: userId,
                     spent: 0,
                     budget: 0,
+                })
+                .then((snap) => {
+                    this.shopListKey = snap.key;
+                    this.shopItems = [];
+                    this.subscribeShopListToValueChange(snap.key);
                 });
             }
             else {
-                
-                // Harcoded
                 const shopListKey = Object.keys(snap.val())[0];
-                // console.log(shopListKey);
-                const currentShopList = shopListRef.child(shopListKey);
-                // console.log(currentShopList);
-
-                currentShopList.on('value', (snapshot) => {
-                    this.isFetching = true;
-                if (snapshot.val())
-                {
-                    let items = snapshot.val().ShoppingItem;
-                    let newShopItems = [];
-                    for (let item in items) {
-                    newShopItems.push({
-                        id: item,
-                        name: items[item].name,
-                        amount: items[item].amount,
-                        cost: items[item].cost,
-                        isDone: items[item].isDone,
-                    });
-                    };
-        
-                    const budget = snapshot.val().budget;
-                    const spent = snapshot.val().spent;
-        
-                    this.shopItems = newShopItems;
-                    this.budget = budget;
-                    this.spent = spent;
-                    this.shopListKey = shopListKey;
-                    this.isFetching = false;
-                }
-                });
-                
-                currentShopList.child('ShoppingItem').on('child_removed', (oldChild) => {
-                    if (oldChild.val().isDone)
-                        currentShopList.once('value')
-                            .then((snapshot) => {
-                                const oldSpent = snapshot.val().spent;
-                                currentShopList.update({
-                                    spent: oldSpent - oldChild.val().amount * oldChild.val().cost,
-                                })
-                            })
-                });
-
+                this.shopListKey = shopListKey;
+                this.subscribeShopListToValueChange(shopListKey);
             }
         });
         
     }
 
-    @action('add new shopping item')
-    addNewShopItemUserId(item, userId) {
-        return new Promise((res, rej) => {
-            const itemsRef = firebase.database().ref(`/ShoppingList/${this.shopListKey}/ShoppingItem`);
-            console.log(itemsRef);
-            itemsRef.push(item, (err) => {
-                if (err)
-                    rej(err);
-                else res();
-            });
-        });
-    }
-
-    // Fetching shopping list and setting listeners to value change and remove shopping item. 
-    @action('connect to firebase ShoppingList')
-    fetchShoppingList() {
-        this.isFetching = true;
-        const itemsRef = firebase.database().ref('ShoppingList');
-        itemsRef.once('value', (snapshot) => {
-            if (snapshot.val() == null)
-                itemsRef.set({
-                spent: 0,
-                });
-            else if (snapshot.val().spent == null)
-            {
-                itemsRef.update({
-                spent: 0,
-                })
-            }
-    
-        });
-            
-        itemsRef.on('value', (snapshot) => {
+    subscribeShopListToValueChange (shopListKey) {
+        const shopListRef = firebase.database().ref('ShoppingList').child(shopListKey);
+        shopListRef.on('value', (snapshot) => {
             this.isFetching = true;
-        if (snapshot.val())
-        {
-            let items = snapshot.val().ShoppingItem;
-            let newShopItems = [];
-            for (let item in items) {
-            newShopItems.push({
-                id: item,
-                name: items[item].name,
-                amount: items[item].amount,
-                cost: items[item].cost,
-                isDone: items[item].isDone,
-            });
-            };
+            if (snapshot.val())
+            {
+                console.log('snapshot to current list', snapshot.val());
+                let items = snapshot.val().ShoppingItem;
+                console.log('shopping items', items);
+                let newShopItems = [];
+                for (let item in items) {
+                newShopItems.push({
+                    id: item,
+                    name: items[item].name,
+                    amount: items[item].amount,
+                    cost: items[item].cost,
+                    isDone: items[item].isDone,
+                });
+                };
+    
+                const budget = snapshot.val().budget;
+                const spent = snapshot.val().spent;
 
-            const budget = snapshot.val().budget;
-            const spent = snapshot.val().spent;
-
-            this.shopItems = newShopItems;
-            this.budget = budget;
-            this.spent = spent;
+                this.shopItems = newShopItems;
+                this.budget = budget;
+                this.spent = spent;
+            }
             this.isFetching = false;
-        }
         });
         
-        itemsRef.child('ShoppingItem').on('child_removed', (oldChild) => {
-        if (oldChild.val().isDone)
-            itemsRef.once('value')
-            .then((snapshot) => {
-                const oldSpent = snapshot.val().spent;
-                itemsRef.update({
-                spent: oldSpent - oldChild.val().amount * oldChild.val().cost,
-                })
-            })
+        shopListRef.child('ShoppingItem').on('child_removed', (oldChild) => {
+            if (oldChild.val().isDone)
+                shopListRef.once('value')
+                    .then((snapshot) => {
+                        const oldSpent = snapshot.val().spent;
+                        shopListRef.update({
+                            spent: oldSpent - oldChild.val().amount * oldChild.val().cost,
+                        })
+                    })
         });
-
     }
 
+    // Current shop list key stored here as observable variable 'shopListKey'. 
     @action('add new shopping item')
-    addNewShopItem(item) {
+    addNewShopItemToCurrentShopList(item) {
         return new Promise((res, rej) => {
-            const itemsRef = firebase.database().ref('ShoppingList').child('ShoppingItem');
+            this.isFetching = true;
+            const itemsRef = firebase.database().ref(`/ShoppingList/${this.shopListKey}/ShoppingItem`);
             itemsRef.push(item, (err) => {
                 if (err)
                     rej(err);
                 else res();
+                this.isFetching = false;
             });
         });
     }
 
     @action('update shopping item')
     updateShopItem(itemId, fieldName, fieldValue) {
-        const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
-        itemRef.update({
-            [fieldName]: fieldValue 
-        });
+        return new Promise((res, rej) => {
+            this.isFetching = true;
+        
+            const itemRef = firebase.database().ref(`/ShoppingList/${this.shopListKey}/ShoppingItem/${itemId}`);
+            itemRef.update({
+                [fieldName]: fieldValue 
+            }, (err) => {
+                if (err) 
+                    rej(err);
+                else res();
+                this.isFetching = false;
+            });
+        })
     }
 
     @action('update budget')
     updateBudget(value) {
         return new Promise((res, rej) => {
-            const listRef = firebase.database().ref('ShoppingList');
+            const listRef = firebase.database().ref('ShoppingList').child(this.shopListKey);
             listRef.update({
                 budget: parseFloat(value),
             }, (err) => {
@@ -191,7 +139,7 @@ class ShoppingListStore {
     @action('update item isDone status')
     updateIsDoneShopItem(itemId) {
         return new Promise((res,rej) => {
-            const itemRef = firebase.database().ref('ShoppingList');
+            const itemRef = firebase.database().ref('ShoppingList').child(this.shopListKey);
 
             itemRef.once('value').then( (snapshot) => {
                 const itemIsDone = !snapshot.val().ShoppingItem[itemId].isDone;
@@ -220,7 +168,7 @@ class ShoppingListStore {
     @action('remove shopping item')
     removeShopItem(itemId) {
         return new Promise((res,rej) => {
-            const itemRef = firebase.database().ref(`/ShoppingList/ShoppingItem/${itemId}`);
+            const itemRef = firebase.database().ref(`/ShoppingList/${this.shopListKey}/ShoppingItem/${itemId}`);
             itemRef.remove((err) => {
                 if (err) rej(err);
                 else res(); 

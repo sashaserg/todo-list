@@ -29,9 +29,10 @@ class ShoppingListWindow extends Component
 
   componentDidMount() {
     // this.props.ShoppingListStore.fetchShoppingList();
-    const uid = this.props.AuthStore.user.uid;
-
-    this.props.ShoppingListStore.findShoppingListByUserId(uid);
+    if( this.props.AuthStore.user) {
+      const uid = this.props.AuthStore.user.uid;
+      this.props.ShoppingListStore.findShoppingListByUserId(uid);
+    }
   }
 
   // Add new shop item to firebase using data from state.
@@ -49,7 +50,7 @@ class ShoppingListWindow extends Component
         isDone: false,
       }
       // this.props.ShoppingListStore.addNewShopItemUserId( this.props.AuthStore.user.uid );
-      this.props.ShoppingListStore.addNewShopItem( newItem )
+      this.props.ShoppingListStore.addNewShopItemToCurrentShopList( newItem )
         .then(() => {
           document.getElementsByName('headName')[0].focus();
           // After success set head state to null and focus on Head Name Field.
@@ -75,11 +76,9 @@ class ShoppingListWindow extends Component
     }
   }
 
-  // Check budget and spent. If spent > budget, show tooltip with warning.
+  // Check budget and spent. If spent > budget and budget differ from 0, show tooltip with warning.
   checkBudgetSpent = () => {
-     console.log('spent: ', this.props.ShoppingListStore.spent, 'budget: ', this.props.ShoppingListStore.budget)
-    
-    if ( this.props.ShoppingListStore.spent > this.props.ShoppingListStore.budget ) {
+    if ( this.props.ShoppingListStore.spent > this.props.ShoppingListStore.budget && this.props.ShoppingListStore.budget != 0 ) {
       
       // Set Tooltip disable to false to show it. 
       document.getElementById('controlPanel').setAttribute('data-tip-disable', false)

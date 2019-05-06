@@ -2,6 +2,7 @@
 import React, {Component, PropTypes} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { observer, inject } from 'mobx-react';
+import { ClipLoader } from 'react-spinners'
 
 /* style */
 import './TodoList.sass';
@@ -11,6 +12,7 @@ import ListItem from '../ListItem/ListItem.js'
 
 
 @inject('TodoListStore')
+@inject('AuthStore')
 @observer
 class TodoList extends Component
 {
@@ -22,7 +24,10 @@ class TodoList extends Component
   }
 
   componentDidMount () {
-    this.props.TodoListStore.fetchTasks();
+    if (this.props.AuthStore.user) {
+      const userId = this.props.AuthStore.user.uid;
+      this.props.TodoListStore.fetchTaskListByUserId(userId);
+    }
   }
 
   inputChangeHandler = (e) => {
@@ -75,6 +80,17 @@ class TodoList extends Component
     this.props.TodoListStore.removeAllTasks();
   }
 
+  renderSpinner = () => {
+    return(
+        <ClipLoader
+          sizeUnit={"px"}
+          size={100}
+          color={'#123abc'}
+          loading={true}
+        />
+    );
+  }
+
   render()
   {
     return (
@@ -92,7 +108,8 @@ class TodoList extends Component
                       name        = {'headName'}/>
             </div>
             <div className='tasks'>
-              { this.props.TodoListStore.tasks ? this.renderTasks() : "no tasks" }
+              { !this.props.TodoListStore.isFetching && this.props.TodoListStore.tasks  ? this.renderTasks() 
+                                                                                        : this.renderSpinner() }
             </div>
 
         </div>

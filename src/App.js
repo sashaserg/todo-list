@@ -11,11 +11,7 @@ import ToDoWindow from './views/ToDoWindow/ToDoWindow.js';
 import ShoppingListWindow from './views/ShoppingListWindow/ShoppingListWindow.js';
 import NotFound from './views/NotFound/NotFound';
 
-/* firebase */
-import firebase, { auth, provider } from './firebase.js';
-
 /* stores */
-import AuthStore from './stores/AuthStore.js';
 import { stores } from './stores'; 
 
 /* style */
@@ -27,16 +23,10 @@ import { faCheck, faTrashAlt, faHome,  faShoppingBag, faWallet, faShoppingBasket
 library.add( faCheck, faTrashAlt, faHome, faShoppingBag, faWallet, faShoppingBasket, faListOl, faDollarSign,faSmile, faTimes  );
 
 class App extends Component {
-  componentDidMount () {
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        AuthStore.user = user;
-      } 
-    });
-
+  componentDidMount() {
+    // Hardcoded to show spinner in Main.js container when cur.user is fetching. 
+    stores.AuthStore.isFetching = true;
   }
-  
   render() {
     return (
         <Provider {...stores}>

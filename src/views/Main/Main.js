@@ -1,21 +1,19 @@
 /* library */
 import React, {Component, PropTypes} from 'react';
 import { Link, Route } from "react-router-dom";
-import { observer } from 'mobx-react'
+import { observer, inject } from 'mobx-react'
+import { ClipLoader } from "react-spinners";
 
 /* component */
 import OptionCard from '../../components/OptionCard/OptionCard.js';
 
-/* store */
-import AuthStore from '../../stores/AuthStore.js';
-
 /* style */
 import './Main.sass';
 
+@inject('AuthStore')
 @observer
 class Main extends Component
 {
-
   optionCardClickHandler = ( path ) => {
     if ( path ) {
       this.props.history.push( '/' + path );
@@ -56,15 +54,35 @@ class Main extends Component
     );
   }
 
+  // Render spinner with loading props as true.
+  renderSpinner = () => {
+    return(
+        <ClipLoader
+          sizeUnit={"px"}
+          size={100}
+          color={'#123abc'}
+          loading={true}
+        />
+    );
+  }
+
   // If user isn't loggin in show the auth warning. Otherwise show the main component or component to display.
   render()
   {
     const { component: ComponentToDisplay } = this.props;
     return ( 
-        <div className='Main-container'>
-              { AuthStore.user ?  (ComponentToDisplay ? this.renderComponentToDisplay(ComponentToDisplay) : this.renderChooseWindow()) 
-                                  : this.renderAuthWarningBlock() }
-        </div>
+        // <div className='Main-container'>
+        //       { this.props.AuthStore.user ? (ComponentToDisplay ? this.renderComponentToDisplay(ComponentToDisplay) 
+        //          : this.renderChooseWindow()) 
+        //          : this.renderAuthWarningBlock() }
+        // </div>
+      <div className='Main-container'>
+              {
+                this.props.AuthStore.isFetching ? this.renderSpinner()  
+                  : (this.props.AuthStore.user ? (ComponentToDisplay ? this.renderComponentToDisplay(ComponentToDisplay) : this.renderChooseWindow())
+                  : this.renderAuthWarningBlock())
+              }
+      </div>
     )
   }
 }

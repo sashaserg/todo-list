@@ -1,14 +1,28 @@
 /* library */
-import { observable, action } from "mobx";
+import { observable, action, autorun, computed } from "mobx";
 
 /* firebase */
 import firebase, { auth, provider } from '../firebase.js';
 
 class AuthStore {
     @observable user;
-    
+    @observable isFetching;
+
     constructor() {
         this.user = null;
+        this.isFetching = false;
+        
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+              this.user = user;
+            } 
+            this.isFetching = false;
+        });
+
+        // autorun(() => {;
+        //     console.log('auth store', {fetching: this.isFetching, user: this.user, authWarning: this.showAuthWarning});
+        // })
+
     }
 
     @action('login')
