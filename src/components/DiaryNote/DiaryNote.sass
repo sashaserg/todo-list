@@ -1,0 +1,59 @@
+.DiaryNode-container
+    width: 100%
+    display: flex
+    flex-direction: column
+    border: 1px #dedede solid
+    box-sizing: border-box
+    border-radius: 5px
+    .header
+        box-sizing: border-box
+        height: 50px
+        width: 100%
+        background-color: none
+        display: flex
+        flex-direction: row
+        justify-content: space-between
+        align-items: center
+        border-bottom: 1px #dedede solid
+        .monthNameField
+            color: #3d0e5f
+            font-weight: 600
+        .btnField
+            box-sizing: border-box
+            height: 100%
+            width: 50px
+            display: flex
+            justify-content: center
+            align-items: center
+            color: #aaaaaa
+            cursor: pointer
+            &:hover
+                background-color: #713ef0
+                color: #ffffff
+            &:first-child
+                border-top-left-radius: 5px
+            &:last-child
+                border-top-right-radius: 5px
+    .textField
+        width: 100%
+        height: 350px
+        margin-bottom: 1px
+        .text
+            height: 100%
+            width: 100%
+            box-sizing: border-box
+            border: none
+            resize: none
+            background-attachment: local
+            background-image: linear-gradient(to right, white 10px, transparent 10px), linear-gradient(to left, white 10px, transparent 10px), repeating-linear-gradient(white, white 39px, #ccc 39px, #ccc 40px, white 40px)
+            line-height: 40px
+            padding: 8px 22px
+            textarea
+                &::-webkit-scrollbar 
+                width: 0 !important 
+                display: none 
+    .blankField
+        height: 30px
+        width: 100%
+        background-color: none
+        border-top:

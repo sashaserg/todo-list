@@ -31,6 +31,10 @@ class Main extends Component
                                                    optionPath   = {'shoppingList'}
                                                    optionIcon   = {'shopping-basket'}
                                                    clickHandler = {this.optionCardClickHandler}/></div>
+        <div className='cardContainer'><OptionCard optionName   = {'Diary'}
+                                                   optionPath   = {'diary'}
+                                                   optionIcon   = {'book'}
+                                                   clickHandler = {this.optionCardClickHandler}/></div>                                           
       </div>
     );
   }

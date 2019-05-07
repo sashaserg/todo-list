@@ -1,14 +1,15 @@
 /* library */
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import NumberFormat from 'react-number-format';
 import Draggable, {DraggableCore} from 'react-draggable';
 import ReactTooltip from 'react-tooltip';
-import { ClipLoader } from 'react-spinners';
+// import { ClipLoader } from 'react-spinners';
 import { observer, inject } from 'mobx-react';
 
 /* component */
 import WhiteShoppingListItem from '../../components/WhiteShoppingListItem/WhiteShoppingListItem.js';
+import ClipSpinner from '../../components/Spinner/ClipSpinner.js';
 
 /* style */
 import './ShoppingListWindow.sass';
@@ -28,7 +29,6 @@ class ShoppingListWindow extends Component
   }
 
   componentDidMount() {
-    // this.props.ShoppingListStore.fetchShoppingList();
     if( this.props.AuthStore.user) {
       const uid = this.props.AuthStore.user.uid;
       this.props.ShoppingListStore.findShoppingListByUserId(uid);
@@ -135,10 +135,8 @@ class ShoppingListWindow extends Component
   // Render spinner with loading props as true.
   renderSpinner = () => {
     return(
-        <ClipLoader
-          sizeUnit={"px"}
+        <ClipSpinner
           size={100}
-          color={'#123abc'}
           loading={true}
         />
     );
@@ -210,7 +208,7 @@ class ShoppingListWindow extends Component
             <button className='headInput addButton' 
                     onClick={this.addNewShopItemToFireBase}>Add</button>
           </div>
-
+         
           <div className='itemPanel'>
             { !this.props.ShoppingListStore.isFetching && this.props.ShoppingListStore.shopItems  ? this.renderShopItems() 
                                                                                                   : this.renderSpinner() }

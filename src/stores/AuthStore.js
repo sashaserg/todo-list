@@ -10,7 +10,9 @@ class AuthStore {
 
     constructor() {
         this.user = null;
-        this.isFetching = false;
+        
+        // To show spinner when program just started.
+        this.isFetching = true;
         
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -18,10 +20,6 @@ class AuthStore {
             } 
             this.isFetching = false;
         });
-
-        // autorun(() => {;
-        //     console.log('auth store', {fetching: this.isFetching, user: this.user, authWarning: this.showAuthWarning});
-        // })
 
     }
 

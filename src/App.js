@@ -10,6 +10,7 @@ import Header from './components/Header/Header.js';
 import ToDoWindow from './views/ToDoWindow/ToDoWindow.js';
 import ShoppingListWindow from './views/ShoppingListWindow/ShoppingListWindow.js';
 import NotFound from './views/NotFound/NotFound';
+import DiaryWindow from "./views/DiaryWindow/DiaryWindow.js";
 
 /* stores */
 import { stores } from './stores'; 
@@ -19,13 +20,13 @@ import './App.css';
 
 /* FontAwesome */
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheck, faTrashAlt, faHome,  faShoppingBag, faWallet, faShoppingBasket, faListOl, faSmile, faTimes, faDollarSign } from '@fortawesome/free-solid-svg-icons'
-library.add( faCheck, faTrashAlt, faHome, faShoppingBag, faWallet, faShoppingBasket, faListOl, faDollarSign,faSmile, faTimes  );
+import { faCheck, faTrashAlt, faHome,  faShoppingBag, faWallet, faShoppingBasket, faListOl, faSmile, faTimes, faDollarSign, faLongArrowAltLeft, faLongArrowAltRight, faBook } from '@fortawesome/free-solid-svg-icons'
+library.add( faCheck, faTrashAlt, faHome, faShoppingBag, faWallet, faBook, faShoppingBasket, faListOl, faLongArrowAltLeft, faLongArrowAltRight, faDollarSign,faSmile, faTimes  );
 
 class App extends Component {
   componentDidMount() {
     // Hardcoded to show spinner in Main.js container when cur.user is fetching. 
-    stores.AuthStore.isFetching = true;
+    // stores.AuthStore.isFetching = true;
   }
   render() {
     return (
@@ -36,6 +37,7 @@ class App extends Component {
             <Route exact path='/' component={Main}/>
             <Route path='/todoList' component={() => <Main component={ToDoWindow}/>}/>
             <Route path='/shoppingList' component={() => <Main component={ShoppingListWindow}/>}/>
+            <Route path='/diary' component={() => <Main component={DiaryWindow}/>}/>
             <Route component={NotFound}/>
           </Switch>
           <DevTools />
